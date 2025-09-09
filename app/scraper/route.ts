@@ -1,3 +1,4 @@
+import { cleanAndExtractContent } from "@/lib/contentExtractor";
 import { scrapeWebsite } from "@/lib/puppeteerScraper";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -12,8 +13,9 @@ export async function POST(req: NextRequest){
         }
 
         const scrapedData = await scrapeWebsite(url);
+        const cleanText = cleanAndExtractContent(scrapedData.html);
 
-        return NextResponse.json({success: true, data: scrapedData}, {status: 200 });
+        return NextResponse.json({success: true, data: { ...scrapedData,cleanText }}, {status: 200 });
 
     } catch (error) {
         console.log(error);
