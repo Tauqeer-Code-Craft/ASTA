@@ -9,7 +9,11 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@babel/preset-env": "^7.28.3",
+    "@babel/preset-typescript": "^7.27.1",
+    "@babel/standalone": "^7.28.4",
     "@monaco-editor/react": "^4.7.0",
+    "@types/babel__standalone": "^7.1.9",
     "@types/puppeteer": "^5.4.7",
     "cheerio": "^1.1.2",
     "next": "15.5.2",
