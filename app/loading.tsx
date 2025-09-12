@@ -32,7 +32,7 @@ const Loading: React.FC = () => {
   }, []);
 
   return (
-    <div ref={root} className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-neutral-950 text-neutral-200">
+    <div ref={root} className="relative flex min-h-screen w-screen flex-col items-center justify-center overflow-hidden bg-neutral-950 text-neutral-200">
       {/* Background gradients / stars */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute left-1/2 top-[35%] h-[800px] w-[800px] -translate-x-1/2 rounded-full bg-fuchsia-600/10 blur-3xl" />

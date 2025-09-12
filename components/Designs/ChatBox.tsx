@@ -1,6 +1,7 @@
-"use client";
-import React, { useState, useEffect, useRef } from "react";
-import { Plus, ArrowUp, Github, Figma, Server, Puzzle } from "lucide-react";
+'use client';
+
+import React, { useState, useRef, useEffect, ChangeEvent } from 'react';
+import { Plus, ArrowUp, Github, Figma, Server, Puzzle } from 'lucide-react';
 
 const phrases = [
   "Build a SaaS landing page",
@@ -9,10 +10,11 @@ const phrases = [
   "Create a marketing hero section",
 ];
 
-const ChatBox: React.FC = () => {
-  const [text, setText] = useState("");
-  const [placeholder, setPlaceholder] = useState("");
+export default function GeneratePage() {
+  const [prompt, setPrompt] = useState('');
+  const [generatedCode, setGeneratedCode] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const [placeholder, setPlaceholder] = useState('');
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -20,25 +22,25 @@ const ChatBox: React.FC = () => {
   const charIndex = useRef(0);
   const deleting = useRef(false);
 
-  // 🔹 Typing placeholder effect
+  // Typing animation for placeholder
   useEffect(() => {
-    if (isFocused || text.length > 0) {
-      setPlaceholder(""); // stop animation when user types
+    if (isFocused || prompt.length > 0) {
+      setPlaceholder('');
       return;
     }
 
     const type = () => {
-      const currentPhrase = phrases[phraseIndex.current];
+      const current = phrases[phraseIndex.current];
 
       if (!deleting.current) {
-        setPlaceholder(currentPhrase.slice(0, charIndex.current + 1));
+        setPlaceholder(current.slice(0, charIndex.current + 1));
         charIndex.current++;
-        if (charIndex.current === currentPhrase.length) {
+        if (charIndex.current === current.length) {
           deleting.current = true;
           return;
         }
       } else {
-        setPlaceholder(currentPhrase.slice(0, charIndex.current - 1));
+        setPlaceholder(current.slice(0, charIndex.current - 1));
         charIndex.current--;
         if (charIndex.current === 0) {
           deleting.current = false;
@@ -49,46 +51,80 @@ const ChatBox: React.FC = () => {
 
     const interval = setInterval(type, deleting.current ? 120 : 180);
     return () => clearInterval(interval);
-  }, [isFocused, text]);
+  }, [isFocused, prompt]);
 
-  // 🔹 Auto-resize textarea height
+  // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
-  }, [text]);
+  }, [prompt]);
+
+  // API Call
+ const generateCode = async () => {
+  try {
+    const res = await fetch('/api/ai-generator', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+    });
+
+    if (!res.ok) throw new Error('Failed to generate code');
+
+    const data = await res.json();
+
+    // Open preview page in a new tab
+    const encoded = encodeURIComponent(data.code);
+    window.open(`/generate/preview`, '_blank');
+  } catch (err) {
+    console.error(err);
+    alert('Error generating code. Please try again.');
+  }
+};
+
+const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  if (e.key === 'Enter') {
+    e.preventDefault(); // prevent newline
+    generateCode();
+  }
+};
+
 
   return (
     <section className="relative mx-auto flex max-w-5xl flex-col items-center px-4 pt-8 text-center">
-      {/* Input box */}
+      <h1 className="text-2xl font-semibold mb-6">AI Code Generator</h1>
+
       <div className="w-full max-w-3xl">
         <div className="relative flex items-end rounded-xl border border-white/10 bg-white/5 px-5 py-4 shadow-lg backdrop-blur-md">
-          {/* Attachment button bottom-left */}
+          {/* Attach Button */}
           <button className="absolute bottom-2 left-3 flex items-center gap-1 text-xs font-medium rounded-md border border-white/10 px-2 py-1 hover:bg-white/10">
             <Plus className="h-4 w-4 text-neutral-300" /> Attach
           </button>
 
-          {/* Textarea with auto-resize + typing placeholder */}
+          {/* Textarea */}
           <textarea
             ref={textareaRef}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
+            value={prompt}
+            onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setPrompt(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
+            onKeyDown={handleKeyDown}
             placeholder={placeholder}
             rows={1}
             className="flex-1 resize-none bg-transparent text-neutral-200 text-sm sm:text-base 
-             placeholder-neutral-400 placeholder:text-sm focus:outline-none pb-4
-             min-h-[70px] max-h-[100px] overflow-y-auto leading-tight"
+            placeholder-neutral-400 placeholder:text-sm focus:outline-none pb-4
+            min-h-[70px] max-h-[100px] overflow-y-auto leading-tight"
           />
-          {/* Send button */}
+
+          {/* Send Button */}
           <button
-            disabled={!text.trim()}
+            onClick={generateCode}
+            disabled={!prompt.trim()}
             className={`absolute bottom-2 right-3 rounded-md p-1 transition-colors ${
-              text.trim()
-                ? "bg-gradient-to-r from-fuchsia-500 to-indigo-500"
-                : "bg-neutral-700"
+              prompt.trim()
+                ? 'bg-gradient-to-r from-fuchsia-500 to-indigo-500'
+                : 'bg-neutral-700'
             }`}
           >
             <ArrowUp className="h-4 w-4 text-white" />
@@ -96,7 +132,7 @@ const ChatBox: React.FC = () => {
         </div>
       </div>
 
-      {/* Action pill buttons */}
+      {/* Action Buttons */}
       <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
         <button className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm hover:bg-white/10">
           <Github className="h-4 w-4" /> Connect a repo
@@ -113,6 +149,4 @@ const ChatBox: React.FC = () => {
       </div>
     </section>
   );
-};
-
-export default ChatBox;
+}

@@ -83,7 +83,7 @@ const Navbar: React.FC = () => {
       }`}
       role="banner"
     >
-      <nav className="flex w-full items-center justify-between px-4 py-3 md:py-4" aria-label="Main Navigation">
+        <nav className="flex max-w-screen-xl mx-auto items-center justify-between px-4 py-3 md:py-4" aria-label="Main Navigation">
         {/* Brand */}
         <div className="flex items-center gap-2">
           <Link href="/" className="group inline-flex items-center gap-2" onClick={close}>
@@ -126,16 +126,15 @@ const Navbar: React.FC = () => {
         </ul>
 
         {/* Right side (CTA) */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-3 ">
           <Link
-            href="#signup"
-            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-lg px-5 py-2 text-sm font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
-          >
-            <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-indigo-600 via-purple-600 to-fuchsia-600 transition-opacity duration-500 group-hover:opacity-0" />
-            <span className="absolute inset-0 rounded-lg opacity-0 blur transition duration-500 group-hover:opacity-100 bg-[conic-gradient(at_30%_50%,#6366f1,#a855f7,#ec4899,#6366f1)] animate-[spin_6s_linear_infinite]" />
-            <span className="relative z-10">Get Started</span>
-            <span className="pointer-events-none absolute inset-0 rounded-lg ring-1 ring-white/20" />
-          </Link>
+  href="#signup"
+  className="inline-flex items-center rounded-md bg-gradient-to-r from-indigo-600 to-fuchsia-600 px-5 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-shadow hover:from-indigo-500 hover:to-fuchsia-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
+>
+  Get Started
+</Link>
+
+
         </div>
 
         {/* Mobile toggle */}

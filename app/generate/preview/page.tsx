@@ -38,15 +38,29 @@ ReactDOM.render(<App />, document.getElementById('root'));
   }, [code]);
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 p-4 h-screen">
+    <div className="flex flex-col md:flex-row gap-6 p-6 min-h-screen bg-neutral-950 text-neutral-100">
       {/* Editor */}
-      <div className="flex-1 border rounded shadow-md overflow-hidden">
-        <CodeEditor code={code} onChange={(value) => setCode(value || "")} />
+      <div className="flex-1 border border-white/20 rounded-xl shadow-lg overflow-hidden bg-neutral-900 transition-all duration-300">
+        <header className="px-4 py-2 border-b border-white/10 bg-neutral-800 font-semibold text-lg select-none">
+          Code Editor
+        </header>
+        <div className="h-[calc(100vh-96px)]"  >
+          <CodeEditor
+          code={code}
+          onChange={(value) => setCode(value || "")}
+          
+        />
+        </div>
       </div>
 
       {/* Preview */}
-      <div className="flex-1 border rounded shadow-md overflow-hidden bg-white">
-        <PreviewBrowser code={transpiledCode} />
+      <div className="flex-1 border border-white/20 rounded-xl shadow-lg overflow-hidden bg-neutral-900 transition-all duration-300 flex flex-col">
+        <header className="px-4 py-2 border-b border-white/10 bg-neutral-800 font-semibold text-lg select-none">
+          Live Preview
+        </header>
+        <div className="flex-1 bg-white rounded-b-xl overflow-auto">
+          <PreviewBrowser code={transpiledCode} />
+        </div>
       </div>
     </div>
   );
