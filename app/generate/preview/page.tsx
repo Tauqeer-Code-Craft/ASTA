@@ -20,6 +20,7 @@ ReactDOM.render(<App />, document.getElementById('root'));
 
   const [code, setCode] = useState(initialCode);
   const [transpiledCode, setTranspiledCode] = useState("");
+  const [activeTab, setActiveTab] = useState<"editor" | "preview">("editor");
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -38,30 +39,81 @@ ReactDOM.render(<App />, document.getElementById('root'));
   }, [code]);
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 p-6 min-h-screen bg-neutral-950 text-neutral-100">
-      {/* Editor */}
-      <div className="flex-1 border border-white/20 rounded-xl shadow-lg overflow-hidden bg-neutral-900 transition-all duration-300">
-        <header className="px-4 py-2 border-b border-white/10 bg-neutral-800 font-semibold text-lg select-none">
-          Code Editor
-        </header>
-        <div className="h-[calc(100vh-96px)]"  >
-          <CodeEditor
-          code={code}
-          onChange={(value) => setCode(value || "")}
-          
-        />
-        </div>
-      </div>
+    <div className="flex h-screen bg-neutral-950 text-neutral-100 font-sans overflow-hidden ">
+      
 
-      {/* Preview */}
-      <div className="flex-1 border border-white/20 rounded-xl shadow-lg overflow-hidden bg-neutral-900 transition-all duration-300 flex flex-col">
-        <header className="px-4 py-2 border-b border-white/10 bg-neutral-800 font-semibold text-lg select-none">
-          Live Preview
-        </header>
-        <div className="flex-1 bg-white rounded-b-xl overflow-auto">
-          <PreviewBrowser code={transpiledCode} />
+      {/* File Tree - 15% */}
+      <aside className="w-[15%] border-r border-neutral-800 bg-neutral-900 p-4 flex flex-col shadow-lg">
+        <h2 className="text-lg font-semibold mb-4 select-none tracking-wide">📂 Files</h2>
+        <ul className="flex-1 overflow-auto space-y-2 text-neutral-300 font-medium text-sm">
+          {/* Example files */}
+          {["index.tsx", "App.tsx", "styles.css", "Header.tsx", "helpers.ts"].map((file) => (
+            <li
+              key={file}
+              className="cursor-pointer hover:bg-neutral-800 rounded px-2 py-1 transition-colors duration-200 truncate"
+              title={file}
+            >
+              {file}
+            </li>
+          ))}
+        </ul>
+      </aside>
+
+      {/* Editor + Preview - 60% */}
+      <section className="w-[60%] flex flex-col shadow-lg bg-neutral-900 overflow-hidden">
+        {/* Tabs */}
+        <nav className="flex border-b border-neutral-700 bg-neutral-950">
+          <button
+            onClick={() => setActiveTab("editor")}
+            className={`flex-1 py-3 text-center font-semibold tracking-wide transition-colors duration-200
+              ${
+                activeTab === "editor"
+                  ? "border-b-4 border-blue-500 text-white bg-neutral-900"
+                  : "text-neutral-400 hover:bg-neutral-800"
+              }
+            `}
+            aria-selected={activeTab === "editor"}
+            role="tab"
+            type="button"
+          >
+            Code Editor
+          </button>
+          <button
+            onClick={() => setActiveTab("preview")}
+            className={`flex-1 py-3 text-center font-semibold tracking-wide transition-colors duration-200
+              ${
+                activeTab === "preview"
+                  ? "border-b-4 border-blue-500 text-white bg-neutral-900"
+                  : "text-neutral-400 hover:bg-neutral-800"
+              }
+            `}
+            aria-selected={activeTab === "preview"}
+            role="tab"
+            type="button"
+          >
+            Live Preview
+          </button>
+        </nav>
+
+        {/* Content */}
+        <div className="flex-1 overflow-hidden">
+          {activeTab === "editor" ? (
+            <CodeEditor code={code} onChange={(value) => setCode(value || "")} />
+          ) : (
+            <PreviewBrowser code={transpiledCode} />
+          )}
         </div>
-      </div>
+      </section>
+
+        {/* Chatbox - 25% */}
+
+
+      <aside className="w-[25%]  border-r border-neutral-800 bg-neutral-900 p-6 flex flex-col rounded-r-lg shadow-lg">
+        <h2 className="text-xl font-semibold mb-6 select-none tracking-wide">💬 Chatbox</h2>
+        <div className="flex-1 bg-neutral-800 rounded-lg p-4 overflow-auto shadow-inner">
+          <p className="text-neutral-300 italic">Chat interface coming soon...</p>
+        </div>
+      </aside>
     </div>
   );
 }
