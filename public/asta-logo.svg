@@ -1,0 +1,28 @@
+<svg width="500" height="500" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>ASTA Logo</title>
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c084fc" />
+      <stop offset="50%" stop-color="#d946ef" />
+      <stop offset="100%" stop-color="#a855f7" />
+    </linearGradient>
+    <style>
+      @media (prefers-color-scheme: dark) { .stroke { stroke: url(#g); } }
+    </style>
+  </defs>
+  <rect width="500" height="500" fill="none" />
+  <g font-family="'Inter', system-ui, sans-serif" font-size="32" letter-spacing="12" fill="#d6a9ff" text-anchor="middle">
+    <text x="250" y="72">A S T A</text>
+    <text transform="rotate(82 60 250)" x="60" y="250" font-size="24" letter-spacing="8">C L O N E</text>
+    <text transform="rotate(98 440 250)" x="440" y="250" font-size="24" letter-spacing="8">A N Y T H I N G</text>
+    <text transform="rotate(-82 250 60)" x="250" y="60" font-size="24" letter-spacing="8" opacity="0">.</text>
+    <text transform="rotate(-98 250 440)" x="250" y="440" font-size="24" letter-spacing="8">M O D I F Y</text>
+  </g>
+  <g stroke="#d6a9ff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" class="stroke" fill="none">
+    <path d="M170 250 L235 175" />
+    <path d="M170 250 L235 325" />
+    <path d="M330 250 L265 175" />
+    <path d="M330 250 L265 325" />
+    <path d="M247 190 L247 310" />
+  </g>
+</svg>

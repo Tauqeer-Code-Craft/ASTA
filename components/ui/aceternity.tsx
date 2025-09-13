@@ -32,6 +32,9 @@ interface ButtonProps extends PrimitiveProps {
   size?: 'sm' | 'md' | 'lg';
   href?: string;
   type?: 'button' | 'submit' | 'reset';
+  onClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
+  target?: string;
+  rel?: string;
 }
 
 const buttonBase = 'relative inline-flex items-center justify-center font-medium rounded-xl transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 disabled:opacity-60 disabled:cursor-not-allowed';
@@ -54,6 +57,9 @@ export const Button: React.FC<ButtonProps> = ({
   size = 'md',
   href,
   type = 'button',
+  onClick,
+  target,
+  rel,
   ...rest
 }) => {
   const classes = clsx(buttonBase, buttonSizes[size], buttonVariants[variant], className, 'group');
@@ -64,14 +70,14 @@ export const Button: React.FC<ButtonProps> = ({
   );
   if (href) {
     return (
-      <a href={href} className={classes} {...rest}>
+      <a href={href} className={classes} onClick={onClick} target={target} rel={rel} {...rest}>
         {innerGlow}
         <span className="relative z-10 flex items-center gap-1">{children}</span>
       </a>
     );
   }
   return (
-    <button type={type} className={classes} {...rest}>
+    <button type={type} className={classes} onClick={onClick} {...rest}>
       {innerGlow}
       <span className="relative z-10 flex items-center gap-1">{children}</span>
     </button>

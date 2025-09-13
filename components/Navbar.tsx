@@ -1,24 +1,12 @@
 "use client";
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useSession, signIn, signOut } from 'next-auth/react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { NAV_LINKS } from '../config/navigation';
 
-/**
- * Navbar
- * ---------------------------------------------------------------------------
- * Responsibilities:
- *  - Sticky top navigation with brand, links, CTA and mobile drawer.
- *  - Animated gradient highlight bar that slides under hovered desktop links.
- *  - Backdrop blur + subtle border appears after minimal scroll.
- *  - Mobile menu collapses automatically when resizing above md breakpoint.
- *
- * Accessibility Notes:
- *  - Uses <nav aria-label="Main Navigation"> with role="menubar" / role="menuitem" semantics.
- *  - Hover highlight is purely decorative (aria-hidden) to avoid noise for AT.
- */
 
-/* ---------------- Types & Constants ---------------- */
-const SCROLL_SHADOW_THRESHOLD = 6; // px before nav gains backdrop styling
+const SCROLL_SHADOW_THRESHOLD = 6;
 
 /* ---------------- Hooks ---------------- */
 /** Hook encapsulating hover highlight animation logic for desktop nav links. */
@@ -125,16 +113,15 @@ const Navbar: React.FC = () => {
           ))}
         </ul>
 
-        {/* Right side (CTA) */}
+        {/* Right side (CTA + Auth) */}
         <div className="hidden md:flex items-center gap-3 ">
           <Link
-  href="#signup"
-  className="inline-flex items-center rounded-md bg-gradient-to-r from-indigo-600 to-fuchsia-600 px-5 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-shadow hover:from-indigo-500 hover:to-fuchsia-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
->
-  Get Started
-</Link>
-
-
+            href="#signup"
+            className="inline-flex items-center rounded-md bg-gradient-to-r from-indigo-600 to-fuchsia-600 px-5 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-shadow hover:from-indigo-500 hover:to-fuchsia-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
+          >
+            Get Started
+          </Link>
+          <AuthActions />
         </div>
 
         {/* Mobile toggle */}
@@ -205,3 +192,93 @@ const Navbar: React.FC = () => {
 };
 
 export default Navbar;
+
+/* ---------------- Auth Actions Component ---------------- */
+const AuthActions: React.FC = () => {
+  const { data: session, status } = useSession();
+  const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const btnRef = useRef<HTMLButtonElement | null>(null);
+  const firstItemRef = useRef<HTMLButtonElement | null>(null);
+
+  // Click outside & escape close
+  useEffect(() => {
+    const onDoc = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'ArrowDown' && open) firstItemRef.current?.focus();
+    };
+    document.addEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onKey);
+    return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey); };
+  }, [open]);
+
+  if (status === 'loading') {
+    return <div className="h-9 w-9 animate-pulse rounded-full bg-neutral-800/60 border border-white/10" />;
+  }
+
+  if (!session) {
+    return (
+      <button
+        onClick={() => { setPending(true); signIn(undefined, { callbackUrl: '/' }); }}
+        disabled={pending}
+        className={"inline-flex items-center rounded-md border border-white/10 bg-neutral-900/60 px-4 py-2 text-sm font-medium shadow-sm backdrop-blur transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 " + (pending ? 'opacity-60 cursor-wait' : 'text-neutral-200 hover:border-fuchsia-500/40 hover:text-white')}
+        aria-busy={pending}
+      >
+        {pending && <span className="mr-2 h-3 w-3 animate-spin rounded-full border-2 border-fuchsia-400 border-t-transparent" />}
+        Sign In
+      </button>
+    );
+  }
+
+  const avatar = session.user?.image;
+  const name = session.user?.name || 'User';
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        ref={btnRef}
+        onClick={() => setOpen(o => !o)}
+        className="h-9 w-9 rounded-full overflow-hidden border border-white/10 ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 transition hover:border-fuchsia-400/50"
+        aria-haspopup="menu" aria-expanded={open} aria-label="Account menu"
+      >
+        {avatar ? (
+          <Image src={avatar} alt={name} width={36} height={36} className="object-cover" />
+        ) : (
+          <div className="h-full w-full flex items-center justify-center text-[11px] font-medium bg-gradient-to-br from-indigo-600 to-fuchsia-600 text-white">{name.charAt(0)}</div>
+        )}
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 mt-3 w-52 origin-top-right overflow-hidden rounded-xl border border-white/10 bg-neutral-900/90 backdrop-blur shadow-lg text-sm divide-y divide-white/5 animate-in fade-in slide-in-from-top-1"
+          style={{
+            animation: 'fadeIn 120ms ease, scaleIn 140ms cubic-bezier(.65,.2,.25,1)'
+          }}
+        >
+          <style>{`@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes scaleIn{from{transform:translateY(-4px) scale(.96)}to{transform:translateY(0) scale(1)}}`}</style>
+          <div className="px-4 py-3">
+            <p className="font-medium text-neutral-100 truncate">{name}</p>
+            {session.user?.email && <p className="text-[11px] text-neutral-400 truncate">{session.user.email}</p>}
+          </div>
+          <div className="py-1" role="none">
+            <button
+              ref={firstItemRef}
+              onClick={() => { /* placeholder manage account */ setOpen(false); }}
+              className="w-full text-left px-4 py-2.5 hover:bg-white/5 text-neutral-200 transition focus-visible:outline-none focus-visible:bg-white/10"
+              role="menuitem"
+            >Manage Account</button>
+            <button
+              onClick={() => signOut({ callbackUrl: '/' })}
+              className="w-full text-left px-4 py-2.5 hover:bg-white/5 text-neutral-200 transition focus-visible:outline-none focus-visible:bg-white/10"
+              role="menuitem"
+            >Logout</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

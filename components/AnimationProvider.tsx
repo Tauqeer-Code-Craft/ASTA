@@ -28,8 +28,7 @@ const AnimationProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
     return () => {
       lenis.off('scroll', update);
-      // @ts-ignore – lenis has destroy
-      lenis.destroy();
+      (lenis as unknown as { destroy: () => void }).destroy();
     };
   }, []);
 
