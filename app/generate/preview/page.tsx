@@ -16,6 +16,15 @@ import { demoTree, FileSystemNode, FileLeaf, DirectoryNode } from '@/lib/fileTre
  * - Right: Assistant / Chat placeholder
  * - Top: Hero style intro with parallax accent & quick actions
  */
+
+function sanitizeCode(raw: string) {
+  return raw
+    .replace(/export\s+default\s+/g, "")   // remove "export default"
+    .replace(/module\.exports\s*=\s*/g, "") // remove "module.exports ="
+    .replace(/exports\./g, "")             // remove "exports.xxx"
+    .trim();
+}
+
 export default function PreviewPage() {
   const searchParams = useSearchParams();
   const initialCode = searchParams.get('code') || `\nfunction App() {\n  return <h1>Hello, edit me!</h1>;\n}\nReactDOM.render(<App />, document.getElementById('root'));\n`;

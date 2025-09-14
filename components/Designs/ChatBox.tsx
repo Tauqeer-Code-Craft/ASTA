@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, useRef, useEffect, ChangeEvent } from 'react';
-import { Plus, ArrowUp, Github, Figma, Server, Puzzle } from 'lucide-react';
+import React, { useState, useRef, useEffect, ChangeEvent } from "react";
+import { Plus, ArrowUp, Github, Figma, Server, Puzzle } from "lucide-react";
 
 const phrases = [
   "Build a SaaS landing page",
@@ -11,10 +11,11 @@ const phrases = [
 ];
 
 export default function GeneratePage() {
-  const [prompt, setPrompt] = useState('');
-  const [generatedCode, setGeneratedCode] = useState('');
+  const [prompt, setPrompt] = useState("");
+  const [generatedCode, setGeneratedCode] = useState("");
   const [isFocused, setIsFocused] = useState(false);
-  const [placeholder, setPlaceholder] = useState('');
+  const [placeholder, setPlaceholder] = useState("");
+  const [selectedModel, setSelectedModel] = useState("");
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -22,10 +23,10 @@ export default function GeneratePage() {
   const charIndex = useRef(0);
   const deleting = useRef(false);
 
-  // Typing animation for placeholder
+  // Typing animation
   useEffect(() => {
     if (isFocused || prompt.length > 0) {
-      setPlaceholder('');
+      setPlaceholder("");
       return;
     }
 
@@ -53,43 +54,42 @@ export default function GeneratePage() {
     return () => clearInterval(interval);
   }, [isFocused, prompt]);
 
-  // Auto-resize textarea
+  // Auto resize
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   }, [prompt]);
 
   // API Call
- const generateCode = async () => {
+  const generateCode = async () => {
   try {
-    const res = await fetch('/api/ai-generator', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt }),
+    const res = await fetch("/api/ai-generator", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt, model: selectedModel }),
     });
 
-    if (!res.ok) throw new Error('Failed to generate code');
+    if (!res.ok) throw new Error("Failed to generate code");
 
     const data = await res.json();
 
-    // Open preview page in a new tab
+    // ✅ Encode aur pass karo preview page ko
     const encoded = encodeURIComponent(data.code);
-    window.open(`/generate/preview`, '_blank');
+    window.open(`/generate/preview?code=${encoded}`, "_blank");
   } catch (err) {
     console.error(err);
-    alert('Error generating code. Please try again.');
+    alert("Error generating code. Please try again.");
   }
 };
 
-const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-  if (e.key === 'Enter') {
-    e.preventDefault(); // prevent newline
-    generateCode();
-  }
-};
-
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && selectedModel && prompt.trim()) {
+      e.preventDefault();
+      generateCode();
+    }
+  };
 
   return (
     <section className="relative mx-auto flex max-w-5xl flex-col items-center px-4 pt-8 text-center">
@@ -102,11 +102,24 @@ const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
             <Plus className="h-4 w-4 text-neutral-300" /> Attach
           </button>
 
+          {/* LLM Select */}
+          <select
+            value={selectedModel}
+            onChange={(e) => setSelectedModel(e.target.value)}
+            className="absolute bottom-2 left-20 text-xs rounded-md border border-white/10 bg-transparent text-neutral-200 px-2 py-1 focus:outline-none"
+          >
+            <option value="">Select LLM</option>
+            <option value="gpt-4">GPT-4 (OpenAI)</option>
+            <option value="gemini">Gemini</option>
+          </select>
+
           {/* Textarea */}
           <textarea
             ref={textareaRef}
             value={prompt}
-            onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setPrompt(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+              setPrompt(e.target.value)
+            }
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             onKeyDown={handleKeyDown}
@@ -120,11 +133,11 @@ const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
           {/* Send Button */}
           <button
             onClick={generateCode}
-            disabled={!prompt.trim()}
+            disabled={!prompt.trim() || !selectedModel}
             className={`absolute bottom-2 right-3 rounded-md p-1 transition-colors ${
-              prompt.trim()
-                ? 'bg-gradient-to-r from-fuchsia-500 to-indigo-500'
-                : 'bg-neutral-700'
+              prompt.trim() && selectedModel
+                ? "bg-gradient-to-r from-fuchsia-500 to-indigo-500"
+                : "bg-neutral-700"
             }`}
           >
             <ArrowUp className="h-4 w-4 text-white" />
