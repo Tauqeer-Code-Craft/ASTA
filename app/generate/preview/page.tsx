@@ -1,8 +1,9 @@
 "use client";
 import React, { useEffect, useState, useCallback } from 'react';
-import * as Babel from '@babel/standalone';
 import { useSearchParams } from 'next/navigation';
 import CodeEditor from '@/components/CodeEditor';
+import WebContainerManager from '@/components/WebContainerManager';
+
 import PreviewBrowser from '@/components/PreviewBrowser';
 import { GradientText, Button, Card } from '@/components/ui/aceternity';
 import { useFadeInOnScroll, useStaggerChildren, useParallax } from '@/lib/animations';
@@ -21,8 +22,8 @@ export default function PreviewPage() {
   const initialCode = searchParams.get('code') || `\nfunction App() {\n  return <h1>Hello, edit me!</h1>;\n}\nReactDOM.render(<App />, document.getElementById('root'));\n`;
 
   const [code, setCode] = useState(initialCode);
-  const [transpiledCode, setTranspiledCode] = useState('');
-  const [compileError, setCompileError] = useState<string | null>(null);
+  // const [transpiledCode, setTranspiledCode] = useState('');
+  // const [compileError, setCompileError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'editor' | 'preview'>('editor');
     // File state needed for Babel filename earlier than transform effect
     const [openDirs, setOpenDirs] = useState<Set<string>>(new Set(['/','/components','/hooks']));
@@ -33,29 +34,7 @@ export default function PreviewPage() {
   const actionsRef = useStaggerChildren<HTMLDivElement>();
   const accentRef = useParallax<HTMLDivElement>(0.5);
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      try {
-        const output = Babel.transform(code, {
-          presets: [
-            ['env', { targets: { esmodules: true } }],
-            ['react', { runtime: 'classic', development: true }],
-            'typescript'
-          ],
-          plugins: ['proposal-class-properties'],
-          filename: activeFile.endsWith('.tsx') || activeFile.endsWith('.ts') ? activeFile : activeFile + '.tsx'
-        }).code;
-        setTranspiledCode(output || '');
-        setCompileError(null);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        setCompileError(message);
-        // Provide noop code to avoid throwing inside iframe repeatedly
-        setTranspiledCode(`console.error(${JSON.stringify('[Compile Error] ')} + ${JSON.stringify(message)});`);
-      }
-    }, 280);
-    return () => clearTimeout(handler);
-  }, [code, activeFile]);
+
 
   // ---------------- File Explorer State ----------------
     // ---------------- File Explorer State ---------------- (moved above for ordering)
@@ -230,27 +209,23 @@ export default function PreviewPage() {
             </div>
           </div>
           <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
-                {compileError && activeTab === 'preview' && (
-                  <div className="p-4 text-xs font-mono text-red-300 whitespace-pre-wrap bg-red-900/20 border-b border-red-500/30">
-                    <strong className="block mb-1 text-red-200">Compile Error:</strong>
-                    {compileError}
-                  </div>
-                )}
+                
                 {activeTab === 'editor' ? (
-              <div className="flex-1 min-h-0">
-                <CodeEditor code={code} onChange={(value) => setCode(value || '')} />
-              </div>
-            ) : (
-              <div className="flex-1 min-h-0 flex flex-col">
-                <div className="px-4 py-2 text-[10px] font-mono tracking-wide text-neutral-400 border-b border-white/10 bg-white/5 flex items-center justify-between">
-                  <span>runtime sandbox (React 18 UMD)</span>
-                  <Button size="sm" variant="subtle" onClick={() => setActiveTab('editor')}>Edit</Button>
-                </div>
-                <div className="flex-1 min-h-0">
-                  <PreviewBrowser code={transpiledCode} />
-                </div>
-              </div>
-            )}
+  <div className="flex-1 min-h-0">
+    <CodeEditor code={code} onChange={(value) => setCode(value || '')} />
+  </div>
+) : (
+  <div className="flex-1 min-h-0 flex flex-col">
+    <div className="px-4 py-2 text-[10px] font-mono tracking-wide text-neutral-400 border-b border-white/10 bg-white/5 flex items-center justify-between">
+      <span>runtime sandbox (WebContainer)</span>
+      <Button size="sm" variant="subtle" onClick={() => setActiveTab('editor')}>Edit</Button>
+    </div>
+    <div className="flex-1 min-h-0">
+      <WebContainerManager files={{ [activeFile]: code }} entryFile={activeFile} />
+    </div>
+  </div>
+)}
+
           </div>
         </div>
 
